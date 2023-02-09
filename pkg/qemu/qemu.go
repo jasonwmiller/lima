@@ -15,6 +15,9 @@ import (
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/docker/go-units"
+	"github.com/mattn/go-shellwords"
+	"github.com/sirupsen/logrus"
+
 	"github.com/lima-vm/lima/pkg/fileutils"
 	"github.com/lima-vm/lima/pkg/iso9660util"
 	"github.com/lima-vm/lima/pkg/limayaml"
@@ -23,8 +26,6 @@ import (
 	"github.com/lima-vm/lima/pkg/qemu/imgutil"
 	"github.com/lima-vm/lima/pkg/store"
 	"github.com/lima-vm/lima/pkg/store/filenames"
-	"github.com/mattn/go-shellwords"
-	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -546,7 +547,8 @@ func Cmdline(cfg Config) (string, []string, error) {
 
 	// virtio-rng-pci accelerates starting up the OS, according to https://wiki.gentoo.org/wiki/QEMU/Options
 	args = append(args, "-device", "virtio-rng-pci")
-
+	// enable-kvm requires nested virtualization, currently lacking in M1 and M2 Macs.
+	args = append(args, "-enable-kvm")
 	// Graphics
 	if *y.Video.Display != "" {
 		args = appendArgsIfNoConflict(args, "-display", *y.Video.Display)
